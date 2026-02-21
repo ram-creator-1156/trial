@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TradeMatch LOC — Swipe to Export</title>
+<meta name="description" content="AI-powered trade matchmaking platform for exporters and importers."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset & Base ─────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #0f1117;
+  --surface:  #171b26;
+  --surface2: #1e2333;
+  --border:   #2a2f3e;
+  --border2:  #343a4f;
+  --text:     #e2e5ef;
+  --muted:    #8990a8;
+  --dim:      #4d5468;
+  --gold:     #c9a84c;
+  --gold2:    #e8c46a;
+  --gold-bg:  rgba(201,168,76,.10);
+  --red:      #c0392b;
+  --red-bg:   rgba(192,57,43,.10);
+  --green:    #27ae60;
+  --green-bg: rgba(39,174,96,.10);
+  --blue:     #3d7ebf;
+  --blue-bg:  rgba(61,126,191,.10);
+  --radius:   10px;
+  --radius-lg:16px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+select,input{font-family:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── Layout ───────────────────────────────────────────────────────────── */
+#app{display:grid;grid-template-columns:260px 1fr 280px;grid-template-rows:52px 1fr;height:100vh;overflow:hidden}
+#topbar{grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--border);background:var(--surface);position:relative;z-index:10}
+#sidebar-left{grid-row:2;border-right:1px solid var(--border);background:var(--surface);overflow-y:auto;padding:16px}
+#main{grid-row:2;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+#sidebar-right{grid-row:2;border-left:1px solid var(--border);background:var(--surface);overflow-y:auto;padding:16px}
+
+/* ── Topbar ───────────────────────────────────────────────────────────── */
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-.3px}
+.logo-icon{width:28px;height:28px;background:var(--gold);border-radius:6px;display:grid;place-items:center;color:#0f0d07;font-size:14px;font-weight:700}
+.logo-sub{font-size:11px;color:var(--muted);font-weight:400;margin-left:2px;letter-spacing:.5px;text-transform:uppercase}
+#status-badge{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.status-dot.online{background:var(--green);box-shadow:0 0 6px var(--green)}
+.status-dot.offline{background:var(--red)}
+#topbar-actions{display:flex;gap:8px;align-items:center}
+.kbd{display:inline-block;padding:1px 6px;border:1px solid var(--border2);border-radius:4px;font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+
+/* ── Section label ────────────────────────────────────────────────────── */
+.section-label{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;margin-top:4px}
+
+/* ── Form controls ────────────────────────────────────────────────────── */
+.ctrl-group{margin-bottom:14px}
+.ctrl-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+select,input[type=range]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:7px 10px;font-size:13px;appearance:none;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238990a8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+select:focus,input:focus{outline:1px solid var(--gold);border-color:var(--gold)}
+input[type=range]{padding:4px 0;border:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--border2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);margin-top:-5px;cursor:pointer}
+.range-row{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:3px}
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;transition:all .15s}
+.btn-primary{background:var(--gold);color:#0f0d07;width:100%}
+.btn-primary:hover{background:var(--gold2)}
+.btn-primary:disabled{background:var(--dim);color:var(--muted);cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-pass{background:var(--surface2);border:1px solid var(--border2);color:var(--muted);flex:1;padding:11px}
+.btn-pass:hover{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.btn-connect{background:var(--gold-bg);border:1px solid var(--gold);color:var(--gold);flex:1;padding:11px;font-weight:600}
+.btn-connect:hover{background:var(--gold);color:#0f0d07}
+.btn-fire{background:var(--surface2);border:1px solid var(--border2);color:var(--text);width:100%;padding:9px}
+.btn-fire:hover{border-color:#b0784a;color:#e8a468;background:rgba(176,120,74,.1)}
+
+/* ── Cards ────────────────────────────────────────────────────────────── */
+.card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px}
+.card-sm{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+
+/* ── Match card ───────────────────────────────────────────────────────── */
+#match-card{position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+#match-card:hover{box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.match-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.match-id{font-size:20px;font-weight:700;letter-spacing:-.4px;color:var(--text)}
+.match-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.score-ring{width:76px;height:76px;border-radius:50%;border:3px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.score-ring .score-num{font-size:22px;font-weight:700;line-height:1;color:var(--gold)}
+.score-ring .score-denom{font-size:10px;color:var(--dim)}
+.grade-pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;border:1px solid}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted)}
+
+/* ── Pillars ──────────────────────────────────────────────────────────── */
+.pillar-list{display:flex;flex-direction:column;gap:8px}
+.pillar-row{display:flex;align-items:center;gap:10px}
+.pillar-icon{width:20px;text-align:center;font-size:13px}
+.pillar-name{width:80px;font-size:11px;color:var(--muted);flex-shrink:0}
+.pillar-track{flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden}
+.pillar-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.pillar-pts{width:52px;text-align:right;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--dim)}
+
+/* ── Radar canvas ─────────────────────────────────────────────────────── */
+#radar-wrap{display:flex;justify-content:center}
+canvas#radar{display:block}
+
+/* ── Accordion ────────────────────────────────────────────────────────── */
+.accordion-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;user-select:none}
+.accordion-header .chevron{transition:transform .2s;color:var(--dim)}
+.accordion-header.open .chevron{transform:rotate(180deg)}
+.accordion-body{border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:12px;display:none;font-size:12px;color:var(--muted);background:rgba(14,16,22,.5)}
+.accordion-body.open{display:block}
+.reason-group{margin-bottom:10px}
+.reason-group:last-child{margin-bottom:0}
+.reason-group strong{display:block;color:var(--text);margin-bottom:4px;font-size:11px}
+.reason-group ul{padding-left:16px}
+.reason-group li{margin-bottom:2px;line-height:1.6}
+
+/* ── Action row ───────────────────────────────────────────────────────── */
+#action-row{display:flex;gap:10px}
+
+/* ── Outreach panel ───────────────────────────────────────────────────── */
+#outreach-panel{display:none}
+#outreach-panel.visible{display:block}
+.outreach-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tone-tabs{display:flex;gap:4px}
+.tone-tab{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s}
+.tone-tab.active{background:var(--gold-bg);border-color:var(--gold);color:var(--gold)}
+#email-subject{font-size:12px;color:var(--dim);margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+#email-body{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap;min-height:120px;max-height:220px;overflow-y:auto}
+
+/* ── Market shift ─────────────────────────────────────────────────────── */
+#sim-result{display:none;margin-top:12px}
+#sim-result.visible{display:block}
+.mover-table{width:100%;border-collapse:collapse;font-size:11px}
+.mover-table th{text-align:left;color:var(--dim);font-weight:500;padding:4px 6px;border-bottom:1px solid var(--border)}
+.mover-table td{padding:5px 6px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+.delta-up{color:var(--green)}
+.delta-down{color:var(--red)}
+
+/* ── Right sidebar ────────────────────────────────────────────────────── */
+#connected-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.connected-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:12px}
+.connected-item .ci-name{font-weight:600;color:var(--text)}
+.connected-item .ci-score{color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:11px}
+.stats-row{display:flex;gap:8px;margin-bottom:12px}
+.stat-box{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;text-align:center}
+.stat-box .stat-n{font-size:18px;font-weight:700;color:var(--text)}
+.stat-box .stat-l{font-size:10px;color:var(--dim);margin-top:2px}
+
+/* ── Empty / loading states ───────────────────────────────────────────── */
+#empty-state{text-align:center;padding:60px 20px;color:var(--dim)}
+#empty-state .empty-icon{font-size:42px;margin-bottom:14px}
+#empty-state p{font-size:14px;line-height:1.8}
+#empty-state em{color:var(--gold);font-style:normal}
+.spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Toast ────────────────────────────────────────────────────────────── */
+#toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:999}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;font-size:13px;box-shadow:0 4px 24px rgba(0,0,0,.5);animation:slide-in .2s ease;max-width:320px}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--red);color:#e57373}
+.toast.info{border-color:var(--gold);color:var(--gold)}
+@keyframes slide-in{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── Divider ──────────────────────────────────────────────────────────── */
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+.nav-counter{font-size:12px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+
+/* ── All-done state ───────────────────────────────────────────────────── */
+#done-state{text-align:center;padding:60px 20px;color:var(--dim);display:none}
+#done-state .done-icon{font-size:42px;margin-bottom:14px}
+
+/* ── Scrollable main when content is tall ─────────────────────────────── */
+#main{overflow-y:auto}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── Top bar ──────────────────────────────────────────────────────── -->
+<header id="topbar">
+  <div class="logo">
+    <div class="logo-icon">TM</div>
+    <span>TradeMatch LOC</span>
+    <span class="logo-sub">Swipe to Export</span>
+  </div>
+  <div id="status-badge">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Connecting…</span>
+  </div>
+  <div id="topbar-actions" style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--dim)">
+    <span><span class="kbd">←</span><span class="kbd">→</span> Navigate</span>
+    <span>|</span>
+    <span id="nav-counter" class="nav-counter">—</span>
+  </div>
+</header>
+
+<!-- ── Left sidebar ─────────────────────────────────────────────────── -->
+<aside id="sidebar-left">
+  <div class="section-label">Exporter Profile</div>
+
+  <div class="ctrl-group">
+    <label>Exporter ID</label>
+    <select id="exporter-select">
+      <option value="">Loading exporters…</option>
+    </select>
+  </div>
+
+  <div class="ctrl-group">
+    <label>Max matches to fetch — <strong id="top-k-val">10</strong></label>
+    <input type="range" id="top-k" min="5" max="25" value="10"/>
+    <div class="range-row"><span>5</span><span>25</span></div>
+  </div>
+
+  <button class="btn btn-primary" id="find-btn" disabled>
+    <span id="find-btn-icon">⊕</span>
+    <span id="find-btn-label">Find Best Matches</span>
+  </button>
+
+  <hr class="divider"/>
+
+  <div class="section-label">Market Shift Signal</div>
+
+  <div class="ctrl-group">
+    <label>Signal Event</label>
+    <select id="sim-scenario">
+      <option value="bulk_buy">📦 Bulk Purchase Announcement</option>
+      <option value="funding_round">💰 Series-B Funding Round</option>
+      <option value="tariff_cut">✂️ Government Tariff Cut</option>
+      <option value="linkedin_spike">📈 LinkedIn / Hiring Spike</option>
+      <option value="geopolitical_risk">⚠️ Geopolitical Risk Event</option>
+      <option value="new_trade_deal">🤝 New Bilateral Trade Deal</option>
+      <option value="supply_shock">🔴 Supply Chain Shock</option>
+    </select>
+  </div>
+
+  <div class="ctrl-group">
+    <label>Buyers affected — <strong id="sim-buyers-val">5</strong></label>
+    <input type="range" id="sim-buyers" min="1" max="15" value="5"/>
+    <div class="range-row"><span>1</span><span>15</span></div>
+  </div>
+
+  <button class="btn btn-fire" id="fire-btn">
+    ⚡ Fire Signal
+  </button>
+
+  <div id="sim-result">
+    <div class="section-label" style="margin-top:12px">Signal Result</div>
+    <div id="sim-banner" class="card-sm" style="margin-bottom:10px;font-size:12px"></div>
+    <div id="sim-movers"></div>
+  </div>
+</aside>
+
+<!-- ── Main content ──────────────────────────────────────────────────── -->
+<main id="main">
+
+  <!-- Empty state -->
+  <div id="empty-state">
+    <div class="empty-icon">🌐</div>
+    <p>Select an exporter from the left panel<br/>and click <em>Find Best Matches</em> to begin.</p>
+  </div>
+
+  <!-- Done state -->
+  <div id="done-state">
+    <div class="done-icon">✓</div>
+    <p style="color:var(--text);font-size:16px;font-weight:600;margin-bottom:6px">All matches reviewed</p>
+    <p>Fetch new matches or simulate a market shift.</p>
+  </div>
+
+  <!-- Match card (hidden initially) -->
+  <div id="match-card" class="card" style="display:none">
+    <div class="match-header">
+      <div>
+        <div class="match-id" id="match-id">—</div>
+        <div class="match-sub" id="match-sub"></div>
+        <div style="margin-top:8px"><span class="grade-pill" id="grade-pill"></span></div>
+        <div class="chip-row" id="match-chips"></div>
+      </div>
+      <div class="score-ring">
+        <div class="score-num" id="score-num">—</div>
+        <div class="score-denom">/ 100</div>
+      </div>
+    </div>
+
+    <!-- Two-column: pillars + radar -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:4px">
+      <div>
+        <div class="section-label">Score Breakdown</div>
+        <div class="pillar-list" id="pillar-list"></div>
+      </div>
+      <div>
+        <div class="section-label">Compatibility Radar</div>
+        <div id="radar-wrap"><canvas id="radar" width="200" height="200"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Why it matched -->
+    <div style="margin-top:14px">
+      <div class="accordion-header" id="acc-header">
+        <span>🔍 Why this match? (Explainable AI)</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="accordion-body" id="acc-body"></div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div id="action-row" style="display:none">
+    <button class="btn btn-pass" id="pass-btn">← Pass</button>
+    <button class="btn btn-connect" id="connect-btn">Connect →</button>
+  </div>
+
+  <!-- Outreach panel -->
+  <div id="outreach-panel" class="card">
+    <div class="outreach-header">
+      <div>
+        <div class="section-label" style="margin-bottom:4px">Outreach-Ready Email</div>
+        <div style="font-size:11px;color:var(--dim)" id="outreach-for"></div>
+      </div>
+      <div class="tone-tabs">
+        <button class="tone-tab active" data-tone="professional">Professional</button>
+        <button class="tone-tab" data-tone="friendly">Friendly</button>
+        <button class="tone-tab" data-tone="urgent">Urgent</button>
+      </div>
+    </div>
+    <div id="email-subject"></div>
+    <div id="email-body"><div class="spinner"></div></div>
+  </div>
+
+</main>
+
+<!-- ── Right sidebar ─────────────────────────────────────────────────── -->
+<aside id="sidebar-right">
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-n" id="stat-connected">0</div><div class="stat-l">Connected</div></div>
+    <div class="stat-box"><div class="stat-n" id="stat-passed">0</div><div class="stat-l">Passed</div></div>
+    <div class="stat-box"><div class="stat-n" id="stat-total">0</div><div class="stat-l">Total</div></div>
+  </div>
+
+  <button class="btn btn-ghost" id="export-btn" style="width:100%;margin-bottom:12px;display:none">
+    ↓ Export Connections CSV
+  </button>
+
+  <div class="section-label">Connected</div>
+  <div id="connected-list">
+    <div style="font-size:12px;color:var(--dim);text-align:center;padding:20px 0">No connections yet</div>
+  </div>
+</aside>
+
+</div><!-- #app -->
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   TradeMatch LOC — Frontend Application
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const API = 'http://localhost:8000';
+
+/* ── State ────────────────────────────────────────────────────────────── */
+const state = {
+  matches:      [],
+  idx:          0,
+  passed:       new Set(),
+  connected:    [],
+  expId:        null,
+  expRow:       {},
+  tone:         'professional',
+  outreachCache:{},
+  loading:      false,
+};
+
+/* ── Pillar config ────────────────────────────────────────────────────── */
+const PILLARS = [
+  { key:'p1_product',   label:'Product',   icon:'⬡', max:30, color:'#c9a84c' },
+  { key:'p2_geography', label:'Geography', icon:'◈', max:20, color:'#7b9cc4' },
+  { key:'p3_signals',   label:'Signals',   icon:'◎', max:30, color:'#6aaa84' },
+  { key:'p4_activity',  label:'Activity',  icon:'▲', max:20, color:'#b07b6a' },
+];
+
+const PILLAR_EXP_KEYS = [
+  '1_product_compatibility',
+  '2_geography_fit',
+  '3_high_intent_signals',
+  '4_trade_activity',
+];
+
+function gradeColor(g) {
+  return {
+    'A+':'#c9a84c','A':'#8aaa6a','B+':'#788daa','B':'#8a7aaa','C':'#aa7a6a','D':'#7a5a5a'
+  }[g] || '#888';
+}
+
+/* ── Toast ────────────────────────────────────────────────────────────── */
+function toast(msg, type='info', duration=3000) {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
+/* ── API helpers ──────────────────────────────────────────────────────── */
+async function apiFetch(path, opts={}) {
+  const res = await fetch(API + path, opts);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+/* ── Status check ─────────────────────────────────────────────────────── */
+async function checkStatus() {
+  const dot  = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  try {
+    await apiFetch('/health');
+    dot.classList.add('online'); dot.classList.remove('offline');
+    text.textContent = 'Backend Online';
+    return true;
+  } catch {
+    dot.classList.add('offline'); dot.classList.remove('online');
+    text.textContent = 'Backend Offline';
+    document.getElementById('find-btn').disabled = true;
+    return false;
+  }
+}
+
+/* ── Load exporter list ───────────────────────────────────────────────── */
+async function loadExporters() {
+  try {
+    const data = await apiFetch('/api/exporters?limit=200');
+    const sel  = document.getElementById('exporter-select');
+    sel.innerHTML = '<option value="">Choose an exporter…</option>';
+    (data.exporter_ids || []).forEach(id => {
+      const opt = document.createElement('option');
+      opt.value = id; opt.textContent = id;
+      sel.appendChild(opt);
+    });
+    document.getElementById('find-btn').disabled = false;
+  } catch(e) {
+    toast('Could not load exporters — is the backend running?', 'error');
+  }
+}
+
+/* ── Find matches ─────────────────────────────────────────────────────── */
+async function findMatches() {
+  const expId = document.getElementById('exporter-select').value;
+  if (!expId) { toast('Please select an exporter first', 'error'); return; }
+  const topK  = parseInt(document.getElementById('top-k').value);
+
+  state.expId   = expId;
+  state.matches = [];
+  state.idx     = 0;
+  state.passed  = new Set();
+  state.outreachCache = {};
+
+  setFindLoading(true);
+  hideOutreach();
+
+  try {
+    const data = await apiFetch(`/api/matches/${encodeURIComponent(expId)}?top_k=${topK}`);
+    state.matches = data.matches || [];
+    toast(`Found ${state.matches.length} matches for ${expId}`, 'success');
+    renderCard();
+    updateStats();
+  } catch(e) {
+    toast(`Error fetching matches: ${e.message}`, 'error');
+    showEmpty();
+  } finally {
+    setFindLoading(false);
+  }
+}
+
+function setFindLoading(on) {
+  const btn   = document.getElementById('find-btn');
+  const icon  = document.getElementById('find-btn-icon');
+  const label = document.getElementById('find-btn-label');
+  btn.disabled   = on;
+  icon.textContent  = on ? '' : '⊕';
+  label.textContent = on ? 'Scoring…' : 'Find Best Matches';
+  if (on) icon.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px"></span>';
+}
+
+/* ── Card rendering ───────────────────────────────────────────────────── */
+function remaining() {
+  return state.matches.filter(m => !state.passed.has(m.importer_buyer_id));
+}
+
+function renderCard() {
+  const rem = remaining();
+  if (!rem.length) { showDone(); return; }
+  if (state.idx >= rem.length) state.idx = 0;
+
+  const m = rem[state.idx];
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('done-state').style.display  = 'none';
+  document.getElementById('match-card').style.display  = 'block';
+  document.getElementById('action-row').style.display  = 'flex';
+
+  // Header
+  document.getElementById('match-id').textContent = m.importer_buyer_id;
+  document.getElementById('match-sub').textContent = `${m.country || ''} ${m.industry ? '· '+m.industry : ''}`.trim();
+  document.getElementById('nav-counter').textContent = `${state.idx + 1} / ${rem.length}`;
+
+  // Score ring
+  const scoreEl = document.getElementById('score-num');
+  scoreEl.textContent = Math.round(m.total_score);
+  scoreEl.style.color = gradeColor(m.grade);
+  document.getElementById('score-num').parentElement.style.borderColor = gradeColor(m.grade);
+
+  // Grade pill
+  const gradePill = document.getElementById('grade-pill');
+  const gc = gradeColor(m.grade);
+  gradePill.textContent = `Grade ${m.grade}`;
+  gradePill.style.color = gc;
+  gradePill.style.borderColor = gc + '88';
+  gradePill.style.background = gc + '18';
+
+  // Chips
+  const chips = document.getElementById('match-chips');
+  chips.innerHTML = '';
+  const chipData = [
+    m.country        ? `🌍 ${m.country}` : null,
+    m.industry       ? `🏭 ${m.industry}` : null,
+    m.avg_order_tons ? `📦 ${Number(m.avg_order_tons).toFixed(0)}t avg order` : null,
+    m.response_probability != null ? `📬 ${(m.response_probability*100).toFixed(0)}% response` : null,
+  ].filter(Boolean);
+  chipData.forEach(c => {
+    const span = document.createElement('span');
+    span.className='chip'; span.textContent=c;
+    chips.appendChild(span);
+  });
+
+  // Pillars
+  renderPillars(m);
+
+  // Radar
+  drawRadar(m);
+
+  // Accordion
+  renderAccordion(m);
+
+  updateStats();
+}
+
+function renderPillars(m) {
+  const list = document.getElementById('pillar-list');
+  list.innerHTML = '';
+  PILLARS.forEach(p => {
+    const val = m[p.key] || 0;
+    const pct = Math.min(val / p.max * 100, 100);
+    list.innerHTML += `
+      <div class="pillar-row">
+        <span class="pillar-icon">${p.icon}</span>
+        <span class="pillar-name">${p.label}</span>
+        <div class="pillar-track">
+          <div class="pillar-fill" style="width:${pct}%;background:${p.color}"></div>
+        </div>
+        <span class="pillar-pts">${val.toFixed(1)}/${p.max}</span>
+      </div>`;
+  });
+}
+
+function drawRadar(m) {
+  const canvas = document.getElementById('radar');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = W*0.36;
+  ctx.clearRect(0,0,W,H);
+
+  const labels = ['Product','Geography','Signals','Activity'];
+  const values = PILLARS.map((p,i) => Math.min((m[p.key]||0)/p.max, 1));
+  const n      = labels.length;
+  const angles = labels.map((_,i) => (Math.PI*2*i/n) - Math.PI/2);
+
+  // Grid rings
+  const RINGS = 4;
+  ctx.save();
+  for (let r=1; r<=RINGS; r++) {
+    ctx.beginPath();
+    angles.forEach((a,i) => {
+      const x=cx+Math.cos(a)*(R*r/RINGS), y=cy+Math.sin(a)*(R*r/RINGS);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+  }
+  // Axes
+  angles.forEach(a=>{
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(a)*R, cy+Math.sin(a)*R);
+    ctx.strokeStyle='rgba(255,255,255,0.07)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+  });
+  ctx.restore();
+
+  // Fill
+  const pts = angles.map((a,i)=>({x:cx+Math.cos(a)*R*values[i],y:cy+Math.sin(a)*R*values[i]}));
+  ctx.beginPath();
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.closePath();
+  ctx.fillStyle   = 'rgba(201,168,76,0.12)';
+  ctx.strokeStyle = '#c9a84c';
+  ctx.lineWidth   = 2;
+  ctx.fill();
+  ctx.stroke();
+
+  // Dots
+  pts.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,3.5,0,Math.PI*2);
+    ctx.fillStyle='#c9a84c';
+    ctx.fill();
+  });
+
+  // Labels
+  ctx.fillStyle='#8990a8';
+  ctx.font='11px Inter,sans-serif';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  angles.forEach((a,i)=>{
+    const lx=cx+Math.cos(a)*(R+18), ly=cy+Math.sin(a)*(R+14);
+    ctx.fillText(labels[i],lx,ly);
+  });
+}
+
+function renderAccordion(m) {
+  const exp = typeof m.explanation === 'string'
+    ? JSON.parse(m.explanation || '{}')
+    : (m.explanation || {});
+
+  const body = document.getElementById('acc-body');
+  body.innerHTML = '';
+
+  const pillarLabels = ['Product Compatibility','Geography Fit','High-Intent Signals','Trade Activity'];
+  PILLAR_EXP_KEYS.forEach((key,i) => {
+    const data    = exp[key] || {};
+    const reasons = data.reasons || [];
+    if (!reasons.length) return;
+    const div = document.createElement('div');
+    div.className = 'reason-group';
+    div.innerHTML = `<strong>${pillarLabels[i]}</strong>
+      <ul>${reasons.map(r=>
+        `<li>${r.replace(/<->/g,'↔').replace(/->/g,'→')}</li>`
+      ).join('')}</ul>`;
+    body.appendChild(div);
+  });
+  if (!body.children.length) {
+    body.innerHTML = '<span style="color:var(--dim)">No detailed reasons available.</span>';
+  }
+}
+
+/* ── Accordion toggle ─────────────────────────────────────────────────── */
+document.getElementById('acc-header').addEventListener('click', () => {
+  const hdr  = document.getElementById('acc-header');
+  const body = document.getElementById('acc-body');
+  hdr.classList.toggle('open');
+  body.classList.toggle('open');
+});
+
+/* ── Pass / Connect ───────────────────────────────────────────────────── */
+function passMatch() {
+  const rem = remaining();
+  if (!rem.length) return;
+  const m = rem[state.idx];
+  state.passed.add(m.importer_buyer_id);
+  toast(`Passed on ${m.importer_buyer_id}`, 'info');
+  hideOutreach();
+  const newRem = remaining();
+  if (state.idx >= newRem.length) state.idx = 0;
+  renderCard();
+}
+
+function connectMatch() {
+  const rem = remaining();
+  if (!rem.length) return;
+  const m = rem[state.idx];
+  if (!state.connected.find(c=>c.importer_buyer_id===m.importer_buyer_id)) {
+    state.connected.push(m);
+  }
+  toast(`Connected with ${m.importer_buyer_id}!`, 'success');
+  updateStats();
+  showOutreach(m);
+}
+
+document.getElementById('pass-btn').addEventListener('click', passMatch);
+document.getElementById('connect-btn').addEventListener('click', connectMatch);
+
+/* ── Keyboard navigation ──────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (e.key==='ArrowLeft')  passMatch();
+  if (e.key==='ArrowRight') connectMatch();
+  if (e.key==='ArrowUp' || e.key==='ArrowDown') {
+    const rem = remaining();
+    if (!rem.length) return;
+    state.idx = (state.idx + (e.key==='ArrowDown'?1:-1) + rem.length) % rem.length;
+    hideOutreach();
+    renderCard();
+    e.preventDefault();
+  }
+});
+
+/* ── Outreach ─────────────────────────────────────────────────────────── */
+function showOutreach(m) {
+  document.getElementById('outreach-panel').classList.add('visible');
+  document.getElementById('outreach-for').textContent = `Personalised for ${m.importer_buyer_id}`;
+  document.getElementById('email-subject').textContent = '';
+  document.getElementById('email-body').innerHTML = '<span class="spinner"></span>';
+  generateOutreach(m, state.tone);
+}
+
+function hideOutreach() {
+  document.getElementById('outreach-panel').classList.remove('visible');
+}
+
+async function generateOutreach(m, tone) {
+  const cacheKey = `${state.expId}_${m.importer_buyer_id}_${tone}`;
+  if (state.outreachCache[cacheKey]) {
+    renderOutreach(state.outreachCache[cacheKey]);
+    return;
+  }
+
+  const payload = {
+    exporter: {
+      exporter_id:  state.expId,
+      company_name: state.expId,
+      industry:     state.expRow.industry || 'General Trade',
+      state:        state.expRow.state    || 'India',
+      certifications: state.expRow.certification || null,
+      capacity_tons:  state.expRow.manufacturing_capacity_tons || null,
+      revenue_usd:    state.expRow.revenue_size_usd || null,
+    },
+    importer: {
+      buyer_id:     m.importer_buyer_id,
+      company_name: m.importer_buyer_id,
+      country:      m.country   || 'International',
+      industry:     m.industry  || 'General Trade',
+      avg_order_tons:     m.avg_order_tons     || null,
+      revenue_usd:        m.revenue_usd        || null,
+      response_probability: m.response_probability || null,
+    },
+    match_score: m.total_score,
+    explanation: typeof m.explanation==='string' ? JSON.parse(m.explanation||'{}') : m.explanation,
+    tone,
+    use_llm: false,
+  };
+
+  try {
+    const data = await apiFetch('/api/generate_outreach', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    state.outreachCache[cacheKey] = data;
+    renderOutreach(data);
+  } catch(e) {
+    document.getElementById('email-body').innerHTML = `<span style="color:var(--red)">Could not generate email: ${e.message}</span>`;
+  }
+}
+
+function renderOutreach(data) {
+  document.getElementById('email-subject').textContent = data.subject || '';
+  const body = document.getElementById('email-body');
+  body.innerHTML = '';
+  body.textContent = data.email_body || '';
+}
+
+/* ── Tone tabs ────────────────────────────────────────────────────────── */
+document.querySelectorAll('.tone-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tone-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.tone = btn.dataset.tone;
+    const rem = remaining();
+    if (rem.length && document.getElementById('outreach-panel').classList.contains('visible')) {
+      document.getElementById('email-body').innerHTML = '<span class="spinner"></span>';
+      generateOutreach(rem[state.idx], state.tone);
+    }
+  });
+});
+
+/* ── Market shift ─────────────────────────────────────────────────────── */
+document.getElementById('fire-btn').addEventListener('click', async () => {
+  const scenario = document.getElementById('sim-scenario').value;
+  const nBuyers  = parseInt(document.getElementById('sim-buyers').value);
+
+  const btn = document.getElementById('fire-btn');
+  btn.disabled=true; btn.textContent='Firing…';
+
+  try {
+    const data = await apiFetch('/api/simulate_real_time', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({scenario, n_buyers:nBuyers, top_k:15, seed:0}),
+    });
+    renderSimResult(data);
+    toast(`${data.scenario_icon} Signal fired! ↑${data.pairs_moved_up}  ↓${data.pairs_moved_down}`, 'success');
+    // Refresh matches if exporter selected
+    if (state.expId) findMatches();
+  } catch(e) {
+    toast(`Simulation error: ${e.message}`, 'error');
+  } finally {
+    btn.disabled=false; btn.textContent='⚡ Fire Signal';
+  }
+});
+
+function renderSimResult(data) {
+  const panel  = document.getElementById('sim-result');
+  const banner = document.getElementById('sim-banner');
+  const movers = document.getElementById('sim-movers');
+  panel.classList.add('visible');
+
+  banner.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">${data.scenario_icon||'⚡'}</span>
+      <div>
+        <div style="font-weight:600;color:var(--text);margin-bottom:2px">${data.scenario_desc||data.scenario}</div>
+        <div style="color:var(--dim)">
+          ↑ ${data.pairs_moved_up} pairs improved &nbsp;|&nbsp;
+          ↓ ${data.pairs_moved_down} pairs declined &nbsp;|&nbsp;
+          ${(data.timestamp||'').slice(0,16)}
+        </div>
+      </div>
+    </div>`;
+
+  const allMovers = [...(data.top_movers||[]), ...(data.top_losers||[])].slice(0,6);
+  if (!allMovers.length) { movers.innerHTML=''; return; }
+  movers.innerHTML = `
+    <table class="mover-table">
+      <thead><tr>
+        <th>Importer</th><th>Before</th><th>After</th><th>Δ</th>
+      </tr></thead>
+      <tbody>
+        ${allMovers.map(r=>{
+          const d = r.score_delta||r.Score_Delta||0;
+          const cls = d>0?'delta-up':'delta-down';
+          return `<tr>
+            <td>${r.importer_buyer_id||r.Importer_Buyer_ID||'—'}</td>
+            <td>${(r.score_before||r.Score_Before||0).toFixed(1)}</td>
+            <td>${(r.score_after ||r.Score_After ||0).toFixed(1)}</td>
+            <td class="${cls}">${d>0?'+':''}${d.toFixed(1)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+/* ── Stats & connected list ───────────────────────────────────────────── */
+function updateStats() {
+  document.getElementById('stat-connected').textContent = state.connected.length;
+  document.getElementById('stat-passed').textContent    = state.passed.size;
+  document.getElementById('stat-total').textContent     = state.matches.length;
+
+  const exportBtn = document.getElementById('export-btn');
+  exportBtn.style.display = state.connected.length ? 'flex' : 'none';
+
+  const list = document.getElementById('connected-list');
+  if (!state.connected.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--dim);text-align:center;padding:20px 0">No connections yet</div>';
+    return;
+  }
+  list.innerHTML = state.connected.map(c=>`
+    <div class="connected-item">
+      <div class="ci-name">${c.importer_buyer_id}</div>
+      <div class="ci-score">${Math.round(c.total_score)} pts &nbsp; Grade ${c.grade}</div>
+    </div>`).join('');
+}
+
+/* ── CSV export ───────────────────────────────────────────────────────── */
+document.getElementById('export-btn').addEventListener('click', () => {
+  const rows = [['Importer ID','Score','Grade']];
+  state.connected.forEach(c=>rows.push([c.importer_buyer_id,c.total_score,c.grade]));
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const a   = document.createElement('a');
+  a.href    = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download= 'tradematc_connections.csv';
+  a.click();
+});
+
+/* ── Empty / done states ──────────────────────────────────────────────── */
+function showEmpty() {
+  document.getElementById('empty-state').style.display = 'block';
+  document.getElementById('done-state').style.display  = 'none';
+  document.getElementById('match-card').style.display  = 'none';
+  document.getElementById('action-row').style.display  = 'none';
+}
+
+function showDone() {
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('done-state').style.display  = 'block';
+  document.getElementById('match-card').style.display  = 'none';
+  document.getElementById('action-row').style.display  = 'none';
+  updateStats();
+}
+
+/* ── Range sliders ────────────────────────────────────────────────────── */
+document.getElementById('top-k').addEventListener('input', function(){
+  document.getElementById('top-k-val').textContent = this.value;
+});
+document.getElementById('sim-buyers').addEventListener('input', function(){
+  document.getElementById('sim-buyers-val').textContent = this.value;
+});
+
+/* ── Exporter dropdown ────────────────────────────────────────────────── */
+document.getElementById('exporter-select').addEventListener('change', function(){
+  if (this.value) state.expId = this.value;
+});
+
+/* ── Find button ──────────────────────────────────────────────────────── */
+document.getElementById('find-btn').addEventListener('click', findMatches);
+
+/* ── Boot ─────────────────────────────────────────────────────────────── */
+(async () => {
+  const ok = await checkStatus();
+  if (ok) await loadExporters();
+  // Re-check every 30s
+  setInterval(async () => {
+    const ok2 = await checkStatus();
+    if (ok2 && document.getElementById('exporter-select').options.length <= 1) {
+      await loadExporters();
+    }
+  }, 30000);
+})();
+</script>
+</body>
+</html>
