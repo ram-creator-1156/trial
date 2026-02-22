@@ -27,6 +27,9 @@ Endpoints
 
 from __future__ import annotations
 
+import io
+import sys
+
 import json
 import os
 import textwrap
@@ -101,7 +104,7 @@ def _get_engine():
         news_signals_df=data.news_signals,
         verbose=False,
     )
-    print("  [startup] MatchmakingEngine ready ✓")
+    print("  [startup] MatchmakingEngine ready [OK]")
     return engine
 
 

@@ -1,0 +1,55 @@
+.explain-panel {
+    padding: 14px 0 6px;
+    border-top: 1px solid var(--border);
+}
+
+.explain-pillar {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-xs);
+    border-left: 3px solid var(--gold-glow);
+    transition: all 0.25s;
+}
+
+.explain-pillar:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-left-color: var(--gold);
+}
+
+.explain-pillar-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.explain-reasons {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.explain-reason {
+    position: relative;
+    padding: 4px 0 4px 18px;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    transition: color 0.2s;
+}
+
+.explain-reason:hover {
+    color: var(--text-secondary);
+}
+
+.explain-reason::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 0.7rem;
+}

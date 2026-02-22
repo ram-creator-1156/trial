@@ -1,0 +1,165 @@
+.outreach-wrap {
+    max-width: 620px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.outreach-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: linear-gradient(135deg, rgba(13, 18, 32, 0.8), rgba(8, 25, 28, 0.6)) !important;
+    border-color: rgba(34, 211, 238, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.outreach-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), var(--purple), transparent);
+    opacity: 0.5;
+}
+
+.outreach-title {
+    color: var(--gold);
+    font-size: 1rem;
+    margin: 0 0 2px;
+    font-weight: 600;
+}
+
+.outreach-meta {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+.tone-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.tone-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.73rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    transition: all 0.25s;
+}
+
+.tone-btn:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.tone-btn.active {
+    color: var(--gold);
+    border-color: var(--gold-glow);
+    background: var(--gold-dim);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.08);
+}
+
+.outreach-subject {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.outreach-subject-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.outreach-subject code {
+    font-family: inherit;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.email-body {
+    border-radius: var(--radius-sm);
+    padding: 22px 24px;
+    font-size: 0.88rem;
+    line-height: 1.85;
+    white-space: pre-wrap;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    position: relative;
+}
+
+.email-body::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 16px;
+    bottom: 16px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--gold-glow), transparent);
+    border-radius: 2px;
+}
+
+.email-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.download-btn,
+.copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: center;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    transition: all 0.25s;
+}
+
+.download-btn:hover,
+.copy-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--gold);
+    border-color: var(--gold-glow);
+    transform: translateY(-1px);
+}
+
+.copy-btn.copied {
+    color: var(--green);
+    border-color: rgba(52, 211, 153, 0.3);
+    background: rgba(52, 211, 153, 0.06);
+}
+
+.outreach-error {
+    padding: 18px;
+    color: var(--red);
+    background: rgba(251, 113, 133, 0.06);
+    border: 1px solid rgba(251, 113, 133, 0.15);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+}

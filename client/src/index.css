@@ -1,0 +1,252 @@
+@import "@fontsource/inter/300.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+
+:root {
+  /* Core palette — rich dark mode */
+  --bg-deep: #06080f;
+  --bg-card: rgba(13, 18, 32, 0.85);
+  --bg-glass: rgba(13, 18, 32, 0.65);
+  --bg-surface: #111827;
+  --bg-surface-2: rgba(20, 28, 48, 0.6);
+  --border: rgba(255, 255, 255, 0.05);
+  --border-glow: rgba(201, 168, 76, 0.3);
+
+  /* Accent palette */
+  --gold: #d4af37;
+  --gold-light: #e8cc6e;
+  --gold-dim: rgba(212, 175, 55, 0.12);
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --cyan: #22d3ee;
+  --cyan-glow: rgba(34, 211, 238, 0.2);
+  --green: #34d399;
+  --green-glow: rgba(52, 211, 153, 0.2);
+  --red: #fb7185;
+  --red-glow: rgba(251, 113, 133, 0.2);
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --coral: #fb923c;
+
+  /* Text hierarchy */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+
+  /* Spacing */
+  --radius: 20px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+
+  /* Shadows */
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(212, 175, 55, 0.03);
+  --shadow-glow: 0 0 30px rgba(212, 175, 55, 0.08);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── Animated mesh gradient background ─── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(212, 175, 55, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(34, 211, 238, 0.03) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(167, 139, 250, 0.02) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  animation: meshShift 20s ease-in-out infinite alternate;
+}
+
+/* Floating orb accent */
+body::after {
+  content: "";
+  position: fixed;
+  top: 15%;
+  right: 10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: orbFloat 15s ease-in-out infinite;
+  filter: blur(60px);
+}
+
+@keyframes meshShift {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes orbFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+
+  33% {
+    transform: translateY(-40px) translateX(20px);
+  }
+
+  66% {
+    transform: translateY(20px) translateX(-30px);
+  }
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+/* ─── Premium Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.15);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.3);
+}
+
+/* ─── Glass utility ─── */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid var(--border);
+}
+
+/* ─── Button base ─── */
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  outline: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+/* ─── Global animation library ─── */
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
