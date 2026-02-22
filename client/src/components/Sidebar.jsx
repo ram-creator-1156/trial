@@ -14,11 +14,6 @@ const SCENARIOS = {
 
 export default function Sidebar({
     apiLive,
-    exporterIds,
-    selectedExp,
-    onSelectExp,
-    onLoadMatches,
-    loadingMatch,
     passedCount,
     connected,
     onFireSignal,
@@ -58,43 +53,7 @@ export default function Sidebar({
 
             <hr className="divider" />
 
-            {/* Exporter Picker */}
-            <section>
-                <h3 className="sidebar-heading">
-                    <span className="heading-icon">🏭</span>
-                    Select Exporter
-                </h3>
-                <select
-                    className="select-field"
-                    value={selectedExp}
-                    onChange={(e) => onSelectExp(e.target.value)}
-                >
-                    <option value="">Choose an exporter…</option>
-                    {exporterIds.map((id) => (
-                        <option key={id} value={id}>
-                            {id}
-                        </option>
-                    ))}
-                </select>
-                <button
-                    className="primary-btn"
-                    onClick={onLoadMatches}
-                    disabled={!selectedExp || loadingMatch}
-                >
-                    {loadingMatch ? (
-                        <>
-                            <FiLoader className="spin" size={16} /> Scoring…
-                        </>
-                    ) : (
-                        <>
-                            🔍 Load Matches
-                            <FiChevronRight size={16} />
-                        </>
-                    )}
-                </button>
-            </section>
 
-            <hr className="divider" />
 
             {/* Live Signal */}
             <section>

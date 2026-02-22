@@ -100,6 +100,7 @@ export default function App() {
 
   const [toast, setToast] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [initialLoadAttempted, setInitialLoadAttempted] = useState(false);
 
   /* ── Toast helper ───────────────────────── */
   const showToast = useCallback((msg, icon = "🎯") => {
@@ -116,12 +117,23 @@ export default function App() {
         if (h.engine_ready) {
           const ids = await fetchExporters();
           setExporterIds(ids);
+          if (ids.length > 0) {
+            setSelectedExp(ids[0]);
+          }
         }
       } catch {
         setApiLive(false);
       }
     })();
   }, []);
+
+  /* ── Auto-load first match ── */
+  useEffect(() => {
+    if (selectedExp && !initialLoadAttempted) {
+      setInitialLoadAttempted(true);
+      handleLoadMatches();
+    }
+  }, [selectedExp, initialLoadAttempted, handleLoadMatches]);
 
   /* ── Load first match for exporter ──────── */
   const handleLoadMatches = useCallback(async () => {
@@ -228,11 +240,6 @@ export default function App() {
 
       <Sidebar
         apiLive={apiLive}
-        exporterIds={exporterIds}
-        selectedExp={selectedExp}
-        onSelectExp={setSelectedExp}
-        onLoadMatches={handleLoadMatches}
-        loadingMatch={loadingMatch}
         passedCount={passed.length}
         connected={connected}
         onFireSignal={handleFireSignal}
@@ -247,13 +254,13 @@ export default function App() {
           </p>
         </div>
 
-        {/* Empty state */}
+        {/* Empty state (engine offline or empty) */}
         {!match && !loadingMatch && (
           <div className="empty-state glass">
-            <div className="empty-icon">🔍</div>
-            <h3>Ready to discover your next trade partner</h3>
+            <div className="empty-icon">🔌</div>
+            <h3>Waiting for match engine...</h3>
             <p>
-              Select an exporter from the sidebar and click <strong>Load Matches</strong> to begin
+              Please make sure the backend is running to start matching buyers and sellers automatically.
             </p>
           </div>
         )}
